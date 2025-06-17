@@ -29,17 +29,19 @@ app.post('/track', async (req, res) => {
         tracking_number: shipCode,
       }),
     });
-    // patch: 先拿原始文字，避免不是 json 直接 crash
+
+    // === PATCH: 先拿 text，再嘗試 parse ===
     const text = await result.text();
     let data;
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error('Track123 回傳非 JSON：', text);
+      console.error('Track123 回傳非 JSON：', text); // ★這行會印出真正的回應
       return res.status(502).json({ error: 'Track123 回傳非 JSON', detail: text });
     }
     console.log('Track123 查詢', shipCode, JSON.stringify(data));
     res.json(data);
+
   } catch (e) {
     console.error('API failed:', e);
     res.status(500).json({ error: 'API failed', detail: String(e) });
