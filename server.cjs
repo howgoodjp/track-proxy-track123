@@ -2,15 +2,20 @@ const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
 
+console.log('Server 正在啟動', new Date().toLocaleString());
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c'; // <--- 這裡換成你自己的 Track123 金鑰
+const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c'; // Track123 Key
 
 app.post('/track', async (req, res) => {
   const { shipCode } = req.body;
-  if (!shipCode) return res.status(400).json({ error: 'Missing shipCode' });
+  if (!shipCode) {
+    console.error('缺少 shipCode');
+    return res.status(400).json({ error: 'Missing shipCode' });
+  }
 
   try {
     const result = await fetch('https://api.track123.com/v1/trackings/get', {
@@ -25,13 +30,15 @@ app.post('/track', async (req, res) => {
       }),
     });
     const data = await result.json();
+    console.log('Track123 查詢', shipCode, JSON.stringify(data));
     res.json(data);
   } catch (e) {
-  console.error('API failed:', e);
-  res.status(500).json({ error: 'API failed', detail: String(e) });
-}
+    console.error('API failed:', e);
+    res.status(500).json({ error: 'API failed', detail: String(e) });
+  }
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Track123 Proxy API running on ' + port));
+
 
