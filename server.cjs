@@ -18,17 +18,14 @@ app.post('/track', async (req, res) => {
   }
 
   try {
-    // 正確的 Track123 API 路徑！不要加 /v1/
-    const result = await fetch('https://api.track123.com/trackings/get', {
-      method: 'POST',
+    // 改用 GET，參數放在 query string
+    const url = `https://api.track123.com/trackings/get?carrier_code=seven&tracking_number=${encodeURIComponent(shipCode)}`;
+    const result = await fetch(url, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'Track123-Api-Key': API_KEY,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        carrier_code: "seven",
-        tracking_number: shipCode,
-      }),
     });
 
     // === PATCH: 先拿 text，再嘗試 parse ===
@@ -51,4 +48,5 @@ app.post('/track', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Track123 Proxy API running on ' + port));
+
 
