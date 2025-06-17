@@ -27,8 +27,9 @@ app.post('/track', async (req, res) => {
     const data = await result.json();
     res.json(data);
   } catch (e) {
-    res.status(500).json({ error: 'API failed', detail: String(e) });
-  }
+  console.error('API failed:', e);
+  res.status(500).json({ error: 'API failed', detail: String(e) });
+}
 });
 
 const port = process.env.PORT || 3000;
