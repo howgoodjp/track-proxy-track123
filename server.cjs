@@ -29,7 +29,15 @@ app.post('/track', async (req, res) => {
         tracking_number: shipCode,
       }),
     });
-    const data = await result.json();
+    // patch: 先拿原始文字，避免不是 json 直接 crash
+    const text = await result.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('Track123 回傳非 JSON：', text);
+      return res.status(502).json({ error: 'Track123 回傳非 JSON', detail: text });
+    }
     console.log('Track123 查詢', shipCode, JSON.stringify(data));
     res.json(data);
   } catch (e) {
@@ -40,5 +48,4 @@ app.post('/track', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Track123 Proxy API running on ' + port));
-
 
