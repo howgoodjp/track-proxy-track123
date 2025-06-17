@@ -18,18 +18,18 @@ app.post('/track', async (req, res) => {
   }
 
   try {
-    const result = await fetch('https://api.track123.com/trackings/get', { // ← v1 拿掉
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Track123-Api-Key': API_KEY,
-  },
-  body: JSON.stringify({
-    carrier_code: "seven",
-    tracking_number: shipCode,
-  }),
-});
-
+    // 正確的 Track123 API 路徑！不要加 /v1/
+    const result = await fetch('https://api.track123.com/trackings/get', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Track123-Api-Key': API_KEY,
+      },
+      body: JSON.stringify({
+        carrier_code: "seven",
+        tracking_number: shipCode,
+      }),
+    });
 
     // === PATCH: 先拿 text，再嘗試 parse ===
     const text = await result.text();
@@ -37,7 +37,7 @@ app.post('/track', async (req, res) => {
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error('Track123 回傳非 JSON：', text); // ★這行會印出真正的回應
+      console.error('Track123 回傳非 JSON：', text); // 印出真正回應內容
       return res.status(502).json({ error: 'Track123 回傳非 JSON', detail: text });
     }
     console.log('Track123 查詢', shipCode, JSON.stringify(data));
