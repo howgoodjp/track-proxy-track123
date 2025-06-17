@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c'; // Track123 Key
+const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c';
 
 app.post('/track', async (req, res) => {
   const { shipCode } = req.body;
@@ -18,27 +18,46 @@ app.post('/track', async (req, res) => {
   }
 
   try {
-    // 改用 GET，參數放在 query string
-    const url = `https://api.track123.com/trackings/get?carrier_code=seven&tracking_number=${encodeURIComponent(shipCode)}`;
-    const result = await fetch(url, {
+    // 1. 先建立 tracking
+    const postResp = await fetch('https://api.track123.com/trackings/post', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Track123-Api-Key': API_KEY,
+      },
+      body: JSON.stringify({
+        carrier_code: "seven",
+        tracking_number: shipCode,
+      }),
+    });
+    const postText = await postResp.text();
+    let postData;
+    try {
+      postData = JSON.parse(postText);
+    } catch (e) {
+      console.error('Track123 建立 tracking 回傳非 JSON：', postText);
+      return res.status(502).json({ error: 'Track123 建立 tracking 回傳非 JSON', detail: postText });
+    }
+
+    // 2. 查詢 tracking
+    const getUrl = `https://api.track123.com/trackings/get?carrier_code=seven&tracking_number=${encodeURIComponent(shipCode)}`;
+    const getResp = await fetch(getUrl, {
       method: 'GET',
       headers: {
         'Track123-Api-Key': API_KEY,
         'Content-Type': 'application/json',
       },
     });
-
-    // === PATCH: 先拿 text，再嘗試 parse ===
-    const text = await result.text();
-    let data;
+    const getText = await getResp.text();
+    let getData;
     try {
-      data = JSON.parse(text);
+      getData = JSON.parse(getText);
     } catch (e) {
-      console.error('Track123 回傳非 JSON：', text); // 印出真正回應內容
-      return res.status(502).json({ error: 'Track123 回傳非 JSON', detail: text });
+      console.error('Track123 查詢 tracking 回傳非 JSON：', getText);
+      return res.status(502).json({ error: 'Track123 查詢 tracking 回傳非 JSON', detail: getText });
     }
-    console.log('Track123 查詢', shipCode, JSON.stringify(data));
-    res.json(data);
+
+    res.json(getData);
 
   } catch (e) {
     console.error('API failed:', e);
@@ -48,5 +67,4 @@ app.post('/track', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Track123 Proxy API running on ' + port));
-
 
