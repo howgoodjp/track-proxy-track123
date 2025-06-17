@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c';
+const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c'; // Track123 Key
 
 app.post('/track', async (req, res) => {
   const { shipCode } = req.body;
@@ -18,8 +18,8 @@ app.post('/track', async (req, res) => {
   }
 
   try {
-    // 1. 先建立 tracking
-    const postResp = await fetch('https://api.track123.com/trackings/post', {
+    // 1. 先建立 tracking（正確官方路徑是 /trackings，POST 方法）
+    const postResp = await fetch('https://api.track123.com/trackings', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,8 +39,8 @@ app.post('/track', async (req, res) => {
       return res.status(502).json({ error: 'Track123 建立 tracking 回傳非 JSON', detail: postText });
     }
 
-    // 2. 查詢 tracking
-    const getUrl = `https://api.track123.com/trackings/get?carrier_code=seven&tracking_number=${encodeURIComponent(shipCode)}`;
+    // 2. 查詢 tracking（正確官方路徑，GET 方法）
+    const getUrl = `https://api.track123.com/trackings?carrier_code=seven&tracking_number=${encodeURIComponent(shipCode)}`;
     const getResp = await fetch(getUrl, {
       method: 'GET',
       headers: {
@@ -67,4 +67,3 @@ app.post('/track', async (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Track123 Proxy API running on ' + port));
-
