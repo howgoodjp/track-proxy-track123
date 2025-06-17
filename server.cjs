@@ -18,17 +18,18 @@ app.post('/track', async (req, res) => {
   }
 
   try {
-    const result = await fetch('https://api.track123.com/v1/trackings/get', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Track123-Api-Key': API_KEY,
-      },
-      body: JSON.stringify({
-        carrier_code: "seven",
-        tracking_number: shipCode,
-      }),
-    });
+    const result = await fetch('https://api.track123.com/trackings/get', { // ← v1 拿掉
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Track123-Api-Key': API_KEY,
+  },
+  body: JSON.stringify({
+    carrier_code: "seven",
+    tracking_number: shipCode,
+  }),
+});
+
 
     // === PATCH: 先拿 text，再嘗試 parse ===
     const text = await result.text();
