@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = fbc3d11fdac44bbfa7cd434e49aa8e4c; // <--- 這裡換成你自己的 Track123 金鑰
+const API_KEY = 'fbc3d11fdac44bbfa7cd434e49aa8e4c'; // <--- 這裡換成你自己的 Track123 金鑰
 
 app.post('/track', async (req, res) => {
   const { shipCode } = req.body;
